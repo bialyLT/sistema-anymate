@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Testing
+coverage/
+
+# Expo
+.expo/
+*.jks
+*.p8
+*.keystore
+
+# Web
+web-build/
+
+# Environment
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local

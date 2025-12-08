@@ -1,0 +1,9 @@
+# General
+.DS_Store
+.env
+.env.local
+.vscode/
+.idea/
+
+# Docker
+docker-compose.override.yml
