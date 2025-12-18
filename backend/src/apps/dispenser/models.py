@@ -15,9 +15,20 @@ class Dispenser(models.Model):
     )
     imagenes = models.ManyToManyField(
         'core.Imagen',
+        through='DispenserImagen',
         related_name="dispensers",
         blank=True,
     )
+
+
+class DispenserImagen(models.Model):
+    dispenser = models.ForeignKey(Dispenser, on_delete=models.CASCADE)
+    imagen = models.ForeignKey('core.Imagen', on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['imagen'], name='uniq_dispenserimagen_imagen'),
+        ]
 
 
 class Solicitud(models.Model):

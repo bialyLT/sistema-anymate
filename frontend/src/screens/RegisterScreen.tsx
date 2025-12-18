@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import axios from 'axios';
 import { styled } from 'nativewind';
+import { useAuth } from '../context/AuthContext';
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
@@ -17,6 +18,14 @@ const RegisterScreen = ({ navigation }: any) => {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const { token } = useAuth();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (token) {
+      navigation.replace('Main');
+    }
+  }, [token]);
 
   const handleRegister = async () => {
     setErrorMessage('');

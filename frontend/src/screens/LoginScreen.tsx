@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import axios from 'axios';
 import { styled } from 'nativewind';
+import { useAuth } from '../context/AuthContext';
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
@@ -13,6 +14,14 @@ const LoginScreen = ({ navigation }: any) => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const { login, token } = useAuth();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (token) {
+      navigation.replace('Main');
+    }
+  }, [token]);
 
   const handleLogin = async () => {
     setErrorMessage(''); // Clear previous errors
@@ -35,10 +44,11 @@ const LoginScreen = ({ navigation }: any) => {
         password: trimmedPassword,
       });
 
-      const { token } = response.data;
-      console.log('Login successful, token:', token);
+      const { token: authToken } = response.data;
+      console.log('Login successful, token:', authToken);
       
-      navigation.replace('Main'); 
+      // Save token to AsyncStorage via AuthContext
+      await login(authToken);
 
     } catch (error: any) {
       console.error('Login error:', error);

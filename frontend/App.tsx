@@ -15,6 +15,9 @@ import ProfileScreen from './src/screens/ProfileScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
 
+// Auth Context
+import { AuthProvider, useAuth } from './src/context/AuthContext';
+
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
@@ -68,20 +71,31 @@ function AuthStack() {
   );
 }
 
-export default function App() {
-  // TODO: Add real Auth Context (Provider) implementation
-  // For now, we use a Navigator that starts at Auth (Login)
-  // When Login is successful, it navigates to 'Main' which is MainTabs
-  // We include both in one stack for simple navigation transition for now 
-  // (In a real app, you conditionally render based on user token existence)
+function AppNavigator() {
+  const { token, isLoading } = useAuth();
+
+  if (isLoading) {
+    return null; // Or a loading screen component
+  }
 
   return (
     <NavigationContainer linking={linking}>
-      <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Auth">
-        <Stack.Screen name="Auth" component={AuthStack} />
-        <Stack.Screen name="Main" component={MainTabs} />
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {token ? (
+          <Stack.Screen name="Main" component={MainTabs} />
+        ) : (
+          <Stack.Screen name="Auth" component={AuthStack} />
+        )}
       </Stack.Navigator>
       <StatusBar style="auto" />
     </NavigationContainer>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppNavigator />
+    </AuthProvider>
   );
 }
