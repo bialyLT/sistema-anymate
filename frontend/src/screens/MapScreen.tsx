@@ -202,7 +202,7 @@ export default function MapScreen() {
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2">
                 <MapPin className="h-5 w-5 text-emerald-700" />
-                Dispensers (Admin)
+                Dispensers
               </CardTitle>
               <CardDescription>Creá, editá o eliminá dispensers desde el panel.</CardDescription>
             </CardHeader>
