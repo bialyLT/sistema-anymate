@@ -33,11 +33,13 @@ INSTALLED_APPS = [
 
     # Local apps
     'users',
+    'core',
     'feed',
     'map',
     'yerbas',
     'gamification',
     'community',
+    'dispenser',
 ]
 
 MIDDLEWARE = [
