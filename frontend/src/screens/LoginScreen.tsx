@@ -2,6 +2,12 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+
 import { useAuth } from '../context/AuthContext';
 import { getApiBaseUrl } from '../lib/api';
 
@@ -71,56 +77,62 @@ export default function LoginScreen() {
 
   return (
     <div className="min-h-screen bg-emerald-50 flex items-center justify-center p-6">
-      <button onClick={goToInicio} className="absolute top-6 left-4 z-10 text-emerald-700 font-bold">
-        Ir al inicio
-      </button>
+      <div className="absolute top-4 left-4">
+        <Button variant="ghost" onClick={goToInicio}>
+          Ir al inicio
+        </Button>
+      </div>
 
       <div className="w-full max-w-md">
-        <div className="mb-10 text-center">
-          <h1 className="text-4xl font-bold text-emerald-600 mb-2">Iniciar Sesión</h1>
-          <p className="text-lg text-gray-500">Bienvenido al mundo del Mate</p>
-        </div>
+        <Card>
+          <CardHeader className="space-y-1">
+            <CardTitle>Iniciar sesión</CardTitle>
+            <CardDescription>Bienvenido al mundo del Mate</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {errorMessage ? (
+              <Alert variant="destructive">
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{errorMessage}</AlertDescription>
+              </Alert>
+            ) : null}
 
-        <div className="bg-white p-6 rounded-2xl shadow-lg">
-          <div className="mb-5">
-            <label className="block text-sm font-semibold text-emerald-900 mb-2">Usuario</label>
-            <input
-              className="w-full bg-gray-100 rounded-lg px-4 py-3 text-base border border-gray-200 text-gray-800"
-              placeholder="Tu nombre de usuario"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              autoCapitalize="none"
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="username">Usuario</Label>
+              <Input
+                id="username"
+                placeholder="Tu nombre de usuario"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                autoCapitalize="none"
+                autoComplete="username"
+              />
+            </div>
 
-          <div className="mb-5">
-            <label className="block text-sm font-semibold text-emerald-900 mb-2">Contraseña</label>
-            <input
-              className="w-full bg-gray-100 rounded-lg px-4 py-3 text-base border border-gray-200 text-gray-800"
-              placeholder="******"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Contraseña</Label>
+              <Input
+                id="password"
+                placeholder="******"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
+              />
+            </div>
 
-          {errorMessage ? <div className="text-red-500 text-center mb-2 -mt-2">{errorMessage}</div> : null}
+            <Button className="w-full" onClick={handleLogin} disabled={loading}>
+              {loading ? 'Cargando...' : 'Ingresar'}
+            </Button>
 
-          <button
-            className="w-full bg-emerald-600 rounded-lg py-4 mt-3 text-white text-lg font-bold disabled:opacity-60"
-            onClick={handleLogin}
-            disabled={loading}
-          >
-            {loading ? 'Cargando...' : 'Ingresar'}
-          </button>
-
-          <div className="mt-6 flex justify-center gap-2">
-            <span className="text-gray-500">¿No tienes cuenta?</span>
-            <Link to="/register" className="text-emerald-600 font-bold">
-              Regístrate
-            </Link>
-          </div>
-        </div>
+            <div className="text-center text-sm text-gray-600">
+              ¿No tienes cuenta?{' '}
+              <Link to="/register" className="font-semibold text-emerald-700 hover:underline">
+                Regístrate
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

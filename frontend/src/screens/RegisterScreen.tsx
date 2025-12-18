@@ -2,6 +2,12 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+
 import { useAuth } from '../context/AuthContext';
 import { getApiBaseUrl } from '../lib/api';
 
@@ -109,80 +115,94 @@ export default function RegisterScreen() {
 
   return (
     <div className="min-h-screen bg-emerald-50 flex items-center justify-center p-6">
-      <button onClick={goToInicio} className="absolute top-6 left-4 z-10 text-emerald-700 font-bold">
-        Ir al inicio
-      </button>
+      <div className="absolute top-4 left-4">
+        <Button variant="ghost" onClick={goToInicio}>
+          Ir al inicio
+        </Button>
+      </div>
 
       <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-emerald-600 mb-2">Crear Cuenta</h1>
-          <p className="text-gray-500">Únete a nuestra comunidad Matera</p>
-        </div>
+        <Card>
+          <CardHeader className="space-y-1">
+            <CardTitle>Crear cuenta</CardTitle>
+            <CardDescription>Únete a nuestra comunidad matera</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {errorMessage ? (
+              <Alert variant="destructive">
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{errorMessage}</AlertDescription>
+              </Alert>
+            ) : null}
 
-        <div className="bg-white p-6 rounded-2xl shadow-lg">
-          <div className="mb-4">
-            <label className="block text-sm font-semibold text-emerald-900 mb-1">Usuario</label>
-            <input
-              className="w-full bg-gray-100 rounded-lg px-4 py-3 text-base border border-gray-200 text-gray-800"
-              placeholder="Elige un usuario único"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              autoCapitalize="none"
-            />
-          </div>
+            {successMessage ? (
+              <Alert variant="success">
+                <AlertTitle>Listo</AlertTitle>
+                <AlertDescription>{successMessage}</AlertDescription>
+              </Alert>
+            ) : null}
 
-          <div className="mb-4">
-            <label className="block text-sm font-semibold text-emerald-900 mb-1">Email</label>
-            <input
-              className="w-full bg-gray-100 rounded-lg px-4 py-3 text-base border border-gray-200 text-gray-800"
-              placeholder="tucorreo@ejemplo.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              type="email"
-              autoCapitalize="none"
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="username">Usuario</Label>
+              <Input
+                id="username"
+                placeholder="Elige un usuario único"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                autoCapitalize="none"
+                autoComplete="username"
+              />
+            </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-semibold text-emerald-900 mb-1">Contraseña</label>
-            <input
-              className="w-full bg-gray-100 rounded-lg px-4 py-3 text-base border border-gray-200 text-gray-800"
-              placeholder="******"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                placeholder="tucorreo@ejemplo.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                type="email"
+                autoCapitalize="none"
+                autoComplete="email"
+              />
+            </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-semibold text-emerald-900 mb-1">Confirmar Contraseña</label>
-            <input
-              className="w-full bg-gray-100 rounded-lg px-4 py-3 text-base border border-gray-200 text-gray-800"
-              placeholder="******"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Contraseña</Label>
+              <Input
+                id="password"
+                placeholder="******"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="new-password"
+              />
+            </div>
 
-          {errorMessage ? <div className="text-red-500 text-center mb-2 -mt-2">{errorMessage}</div> : null}
-          {successMessage ? <div className="text-emerald-600 font-bold text-center mb-2 -mt-2">{successMessage}</div> : null}
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirmar contraseña</Label>
+              <Input
+                id="confirmPassword"
+                placeholder="******"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                autoComplete="new-password"
+              />
+            </div>
 
-          <button
-            className="w-full bg-emerald-600 rounded-lg py-4 mt-3 text-white text-lg font-bold disabled:opacity-60"
-            onClick={handleRegister}
-            disabled={loading}
-          >
-            {loading ? 'Creando cuenta...' : 'Registrarse'}
-          </button>
+            <Button className="w-full" onClick={handleRegister} disabled={loading}>
+              {loading ? 'Creando cuenta...' : 'Registrarse'}
+            </Button>
 
-          <div className="mt-6 flex justify-center gap-2">
-            <span className="text-gray-500">¿Ya tienes cuenta?</span>
-            <Link to="/login" className="text-emerald-600 font-bold">
-              Inicia Sesión
-            </Link>
-          </div>
-        </div>
+            <div className="text-center text-sm text-gray-600">
+              ¿Ya tienes cuenta?{' '}
+              <Link to="/login" className="font-semibold text-emerald-700 hover:underline">
+                Inicia sesión
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
