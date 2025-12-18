@@ -61,6 +61,7 @@ export default function MapScreen() {
   const fetchDispensers = async () => {
     setLoading(true);
     try {
+      // GET es público (sin sesión) y también funciona con token.
       const res = await axios.get(`${baseURL}/api/dispensers/`, { headers });
       setDispensers(res.data || []);
     } catch (e: any) {
@@ -71,35 +72,29 @@ export default function MapScreen() {
     }
   };
 
-  const fetchIsAdminAndData = async () => {
-    setError('');
+  useEffect(() => {
+    // Siempre: cargar dispensers para verlos en el mapa (sin sesión también).
+    fetchDispensers();
+
+    // Si hay sesión: determinar rol para habilitar CRUD.
     if (!token) {
       setIsAdmin(false);
-      setDispensers([]);
       return;
     }
 
-    try {
-      const profileRes = await axios.get(`${baseURL}/api/users/profile/`, { headers });
-      const grupos: string[] = profileRes.data?.grupos || [];
-      const ok = grupos.includes('Administrador') || grupos.includes('Administrador Empleado');
-      setIsAdmin(ok);
-      if (!ok) {
-        setDispensers([]);
-        return;
+    (async () => {
+      try {
+        const profileRes = await axios.get(`${baseURL}/api/users/profile/`, { headers });
+        const grupos: string[] = profileRes.data?.grupos || [];
+        const ok = grupos.includes('Administrador') || grupos.includes('Administrador Empleado');
+        setIsAdmin(ok);
+      } catch (e) {
+        console.error(e);
+        setIsAdmin(false);
       }
-      await fetchDispensers();
-    } catch (e) {
-      console.error(e);
-      setIsAdmin(false);
-      setDispensers([]);
-    }
-  };
-
-  useEffect(() => {
-    fetchIsAdminAndData();
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+  }, [token, baseURL]);
 
   const resetForm = () => {
     setNombre('');
@@ -285,13 +280,11 @@ export default function MapScreen() {
               </Marker>
             ) : null}
 
-            {isAdmin
-              ? dispensers.map((d) => (
-                  <Marker key={d.codigo_dispenser} position={[d.ubicacion.latitud, d.ubicacion.longitud]}>
-                    <Popup>{d.nombre_dispenser}</Popup>
-                  </Marker>
-                ))
-              : null}
+            {dispensers.map((d) => (
+              <Marker key={d.codigo_dispenser} position={[d.ubicacion.latitud, d.ubicacion.longitud]}>
+                <Popup>{d.nombre_dispenser}</Popup>
+              </Marker>
+            ))}
           </MapContainer>
         </div>
       </div>

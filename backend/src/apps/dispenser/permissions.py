@@ -1,12 +1,14 @@
-from rest_framework.permissions import BasePermission
+from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
 class IsAdminOrEmpleado(BasePermission):
-    """Permite acceso solo a usuarios en grupos 'Administrador' o 'Administrador Empleado'."""
+    """Permite lectura (GET/HEAD/OPTIONS) a cualquiera; escritura solo a Admin/Admin Empleado."""
 
     allowed_groups = {"Administrador", "Administrador Empleado"}
 
     def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return True
         user = request.user
         if not user or not user.is_authenticated:
             return False
