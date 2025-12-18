@@ -47,6 +47,7 @@ class PersonaSerializer(serializers.ModelSerializer):
 
 class UserProfileSerializer(serializers.ModelSerializer):
     persona = serializers.SerializerMethodField()
+    grupos = serializers.SerializerMethodField()
 
     def get_persona(self, obj):
         try:
@@ -54,8 +55,11 @@ class UserProfileSerializer(serializers.ModelSerializer):
         except Persona.DoesNotExist:
             return None
         return PersonaSerializer(persona).data
+
+    def get_grupos(self, obj):
+        return list(obj.groups.values_list('name', flat=True))
     
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'persona']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'persona', 'grupos']
 

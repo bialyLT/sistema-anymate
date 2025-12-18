@@ -1,16 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { styled } from 'nativewind';
+import { Link, useNavigate } from 'react-router-dom';
+
 import { useAuth } from '../context/AuthContext';
+import { getApiBaseUrl } from '../lib/api';
 
-const StyledView = styled(View);
-const StyledText = styled(Text);
-const StyledTextInput = styled(TextInput);
-const StyledTouchableOpacity = styled(TouchableOpacity);
-const StyledScrollView = styled(ScrollView);
-
-const RegisterScreen = ({ navigation }: any) => {
+export default function RegisterScreen() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -19,13 +14,19 @@ const RegisterScreen = ({ navigation }: any) => {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const { token } = useAuth();
+  const navigate = useNavigate();
+  const baseURL = getApiBaseUrl();
 
   // Redirect if already authenticated
   useEffect(() => {
     if (token) {
-      navigation.replace('Main');
+      navigate('/home', { replace: true });
     }
-  }, [token]);
+  }, [token, navigate]);
+
+  const goToInicio = () => {
+    navigate('/home');
+  };
 
   const handleRegister = async () => {
     setErrorMessage('');
@@ -72,8 +73,6 @@ const RegisterScreen = ({ navigation }: any) => {
 
     setLoading(true);
     try {
-      const baseURL = Platform.OS === 'web' ? 'http://localhost:8000' : 'http://10.0.2.2:8000';
-      
       // Register
       await axios.post(`${baseURL}/api/users/register/`, {
         username: trimmedUsername,
@@ -84,7 +83,7 @@ const RegisterScreen = ({ navigation }: any) => {
       // Auto Login after register (Optional, generally good UX) or redirect to Login
       setSuccessMessage('Cuenta creada correctamente. Redirigiendo...');
       setTimeout(() => {
-        navigation.navigate('Login');
+        navigate('/login');
       }, 2000);
 
     } catch (error: any) {
@@ -109,83 +108,82 @@ const RegisterScreen = ({ navigation }: any) => {
   };
 
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      className="flex-1 bg-emerald-50"
-    >
-      <StyledScrollView contentContainerStyle={{flexGrow: 1, justifyContent: 'center', padding: 24}}>
-        <StyledView className="mb-8 items-center">
-          <StyledText className="text-3xl font-bold text-emerald-600 mb-2">Crear Cuenta</StyledText>
-          <StyledText className="text-gray-500">Únete a nuestra comunidad Matera</StyledText>
-        </StyledView>
+    <div className="min-h-screen bg-emerald-50 flex items-center justify-center p-6">
+      <button onClick={goToInicio} className="absolute top-6 left-4 z-10 text-emerald-700 font-bold">
+        Ir al inicio
+      </button>
 
-        <StyledView className="bg-white p-6 rounded-2xl shadow-lg">
-          <StyledView className="mb-4">
-            <StyledText className="text-sm font-semibold text-emerald-900 mb-1">Usuario</StyledText>
-            <StyledTextInput
-              className="bg-gray-100 rounded-lg px-4 py-3 text-base border border-gray-200 text-gray-800"
+      <div className="w-full max-w-md">
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-bold text-emerald-600 mb-2">Crear Cuenta</h1>
+          <p className="text-gray-500">Únete a nuestra comunidad Matera</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-2xl shadow-lg">
+          <div className="mb-4">
+            <label className="block text-sm font-semibold text-emerald-900 mb-1">Usuario</label>
+            <input
+              className="w-full bg-gray-100 rounded-lg px-4 py-3 text-base border border-gray-200 text-gray-800"
               placeholder="Elige un usuario único"
               value={username}
-              onChangeText={setUsername}
+              onChange={(e) => setUsername(e.target.value)}
               autoCapitalize="none"
             />
-          </StyledView>
+          </div>
 
-          <StyledView className="mb-4">
-            <StyledText className="text-sm font-semibold text-emerald-900 mb-1">Email</StyledText>
-            <StyledTextInput
-              className="bg-gray-100 rounded-lg px-4 py-3 text-base border border-gray-200 text-gray-800"
+          <div className="mb-4">
+            <label className="block text-sm font-semibold text-emerald-900 mb-1">Email</label>
+            <input
+              className="w-full bg-gray-100 rounded-lg px-4 py-3 text-base border border-gray-200 text-gray-800"
               placeholder="tucorreo@ejemplo.com"
               value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
+              onChange={(e) => setEmail(e.target.value)}
+              type="email"
               autoCapitalize="none"
             />
-          </StyledView>
+          </div>
 
-          <StyledView className="mb-4">
-            <StyledText className="text-sm font-semibold text-emerald-900 mb-1">Contraseña</StyledText>
-            <StyledTextInput
-              className="bg-gray-100 rounded-lg px-4 py-3 text-base border border-gray-200 text-gray-800"
+          <div className="mb-4">
+            <label className="block text-sm font-semibold text-emerald-900 mb-1">Contraseña</label>
+            <input
+              className="w-full bg-gray-100 rounded-lg px-4 py-3 text-base border border-gray-200 text-gray-800"
               placeholder="******"
-              secureTextEntry
+              type="password"
               value={password}
-              onChangeText={setPassword}
+              onChange={(e) => setPassword(e.target.value)}
             />
-          </StyledView>
+          </div>
 
-          <StyledView className="mb-4">
-            <StyledText className="text-sm font-semibold text-emerald-900 mb-1">Confirmar Contraseña</StyledText>
-            <StyledTextInput
-              className="bg-gray-100 rounded-lg px-4 py-3 text-base border border-gray-200 text-gray-800"
+          <div className="mb-4">
+            <label className="block text-sm font-semibold text-emerald-900 mb-1">Confirmar Contraseña</label>
+            <input
+              className="w-full bg-gray-100 rounded-lg px-4 py-3 text-base border border-gray-200 text-gray-800"
               placeholder="******"
-              secureTextEntry
+              type="password"
               value={confirmPassword}
-              onChangeText={setConfirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
             />
-          </StyledView>
+          </div>
 
-          {errorMessage ? <StyledText className="text-red-500 text-center mb-2 -mt-2">{errorMessage}</StyledText> : null}
-          {successMessage ? <StyledText className="text-emerald-600 font-bold text-center mb-2 -mt-2">{successMessage}</StyledText> : null}
+          {errorMessage ? <div className="text-red-500 text-center mb-2 -mt-2">{errorMessage}</div> : null}
+          {successMessage ? <div className="text-emerald-600 font-bold text-center mb-2 -mt-2">{successMessage}</div> : null}
 
-          <StyledTouchableOpacity 
-            className="bg-emerald-600 rounded-lg py-4 items-center mt-3 active:bg-emerald-700"
-            onPress={handleRegister}
+          <button
+            className="w-full bg-emerald-600 rounded-lg py-4 mt-3 text-white text-lg font-bold disabled:opacity-60"
+            onClick={handleRegister}
             disabled={loading}
           >
-            <StyledText className="text-white text-lg font-bold">{loading ? 'Creando cuenta...' : 'Registrarse'}</StyledText>
-          </StyledTouchableOpacity>
+            {loading ? 'Creando cuenta...' : 'Registrarse'}
+          </button>
 
-          <StyledView className="mt-6 flex-row justify-center gap-2">
-            <StyledText className="text-gray-500">¿Ya tienes cuenta?</StyledText>
-            <StyledTouchableOpacity onPress={() => navigation.navigate('Login')}>
-              <StyledText className="text-emerald-600 font-bold">Inicia Sesión</StyledText>
-            </StyledTouchableOpacity>
-          </StyledView>
-        </StyledView>
-      </StyledScrollView>
-    </KeyboardAvoidingView>
+          <div className="mt-6 flex justify-center gap-2">
+            <span className="text-gray-500">¿Ya tienes cuenta?</span>
+            <Link to="/login" className="text-emerald-600 font-bold">
+              Inicia Sesión
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
   );
-};
-
-export default RegisterScreen;
+}

@@ -1,5 +1,4 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface AuthContextType {
   token: string | null;
@@ -17,7 +16,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const checkAuth = async () => {
     try {
-      const storedToken = await AsyncStorage.getItem('userToken');
+      const storedToken = window.localStorage.getItem('userToken');
       setToken(storedToken);
     } catch (error) {
       console.error('Error checking auth:', error);
@@ -28,7 +27,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (newToken: string) => {
     try {
-      await AsyncStorage.setItem('userToken', newToken);
+      window.localStorage.setItem('userToken', newToken);
       setToken(newToken);
     } catch (error) {
       console.error('Error saving token:', error);
@@ -37,7 +36,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = async () => {
     try {
-      await AsyncStorage.removeItem('userToken');
+      window.localStorage.removeItem('userToken');
       setToken(null);
     } catch (error) {
       console.error('Error removing token:', error);

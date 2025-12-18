@@ -1,0 +1,130 @@
+#map-root {
+  height: 100%;
+  width: 100%;
+  min-height: 100vh;
+}
+
+#map-layout {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  min-height: 100vh;
+}
+
+#map-container {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+}
+
+#leaflet-map,
+#map-container .leaflet-container {
+  height: 100%;
+  width: 100%;
+}
+
+#dispenser-panel {
+  width: 320px;
+  height: 100%;
+  overflow: auto;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-sizing: border-box;
+}
+
+#dispenser-panel [data-ui="title"] {
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+#dispenser-panel label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+
+#dispenser-panel input[type="text"],
+#dispenser-panel input[type="number"],
+#dispenser-panel input[type="file"] {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  background: white;
+}
+
+#dispenser-panel button {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 0;
+  cursor: pointer;
+}
+
+#dispenser-panel button[data-ui="primary"] {
+  background: #059669;
+  color: white;
+  font-weight: 700;
+}
+
+#dispenser-panel button[data-ui="secondary"] {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+#dispenser-panel button[data-ui="danger"] {
+  background: #ef4444;
+  color: white;
+  font-weight: 700;
+}
+
+#dispenser-panel [data-ui="row"] {
+  display: flex;
+  gap: 8px;
+}
+
+#dispenser-panel [data-ui="row"] > * {
+  flex: 1;
+}
+
+#dispenser-panel [data-ui="muted"] {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 12px;
+}
+
+#dispenser-panel [data-ui="error"] {
+  color: #b91c1c;
+  font-size: 12px;
+}
+
+#dispenser-panel [data-ui="list"] {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+#dispenser-panel [data-ui="card"] {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 12px;
+  padding: 10px;
+  background: white;
+}
+
+#dispenser-panel [data-ui="card-title"] {
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+#dispenser-panel [data-ui="card-actions"] {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+#dispenser-panel [data-ui="card-actions"] button {
+  width: auto;
+  flex: 1;
+}

@@ -1,27 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { styled } from 'nativewind';
+import { Link, useNavigate } from 'react-router-dom';
+
 import { useAuth } from '../context/AuthContext';
+import { getApiBaseUrl } from '../lib/api';
 
-const StyledView = styled(View);
-const StyledText = styled(Text);
-const StyledTextInput = styled(TextInput);
-const StyledTouchableOpacity = styled(TouchableOpacity);
-
-const LoginScreen = ({ navigation }: any) => {
+export default function LoginScreen() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const { login, token } = useAuth();
+  const navigate = useNavigate();
+  const baseURL = getApiBaseUrl();
 
   // Redirect if already authenticated
   useEffect(() => {
     if (token) {
-      navigation.replace('Main');
+      navigate('/home', { replace: true });
     }
-  }, [token]);
+  }, [token, navigate]);
+
+  const goToInicio = () => {
+    navigate('/home');
+  };
 
   const handleLogin = async () => {
     setErrorMessage(''); // Clear previous errors
@@ -36,9 +38,6 @@ const LoginScreen = ({ navigation }: any) => {
 
     setLoading(true);
     try {
-      // NOTE: For Android Emulator use 10.0.2.2, for web localhost, for physical device LAN IP.
-      const baseURL = Platform.OS === 'web' ? 'http://localhost:8000' : 'http://10.0.2.2:8000';
-      
       const response = await axios.post(`${baseURL}/api-token-auth/`, {
         username: trimmedUsername,
         password: trimmedPassword,
@@ -71,57 +70,58 @@ const LoginScreen = ({ navigation }: any) => {
   };
 
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      className="flex-1 bg-emerald-50 justify-center p-6"
-    >
-      <StyledView className="mb-12 items-center">
-        <StyledText className="text-4xl font-bold text-emerald-600 mb-2">Iniciar Sesión</StyledText>
-        <StyledText className="text-lg text-gray-500">Bienvenido al mundo del Mate</StyledText>
-      </StyledView>
+    <div className="min-h-screen bg-emerald-50 flex items-center justify-center p-6">
+      <button onClick={goToInicio} className="absolute top-6 left-4 z-10 text-emerald-700 font-bold">
+        Ir al inicio
+      </button>
 
-      <StyledView className="bg-white p-6 rounded-2xl shadow-lg">
-        <StyledView className="mb-5">
-          <StyledText className="text-sm font-semibold text-emerald-900 mb-2">Usuario</StyledText>
-          <StyledTextInput
-            className="bg-gray-100 rounded-lg px-4 py-3 text-base border border-gray-200 text-gray-800"
-            placeholder="Tu nombre de usuario"
-            value={username}
-            onChangeText={setUsername}
-            autoCapitalize="none"
-          />
-        </StyledView>
+      <div className="w-full max-w-md">
+        <div className="mb-10 text-center">
+          <h1 className="text-4xl font-bold text-emerald-600 mb-2">Iniciar Sesión</h1>
+          <p className="text-lg text-gray-500">Bienvenido al mundo del Mate</p>
+        </div>
 
-        <StyledView className="mb-5">
-          <StyledText className="text-sm font-semibold text-emerald-900 mb-2">Contraseña</StyledText>
-          <StyledTextInput
-            className="bg-gray-100 rounded-lg px-4 py-3 text-base border border-gray-200 text-gray-800"
-            placeholder="******"
-            secureTextEntry
-            value={password}
-            onChangeText={setPassword}
-          />
-        </StyledView>
+        <div className="bg-white p-6 rounded-2xl shadow-lg">
+          <div className="mb-5">
+            <label className="block text-sm font-semibold text-emerald-900 mb-2">Usuario</label>
+            <input
+              className="w-full bg-gray-100 rounded-lg px-4 py-3 text-base border border-gray-200 text-gray-800"
+              placeholder="Tu nombre de usuario"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              autoCapitalize="none"
+            />
+          </div>
 
-        {errorMessage ? <StyledText className="text-red-500 text-center mb-2 -mt-2">{errorMessage}</StyledText> : null}
+          <div className="mb-5">
+            <label className="block text-sm font-semibold text-emerald-900 mb-2">Contraseña</label>
+            <input
+              className="w-full bg-gray-100 rounded-lg px-4 py-3 text-base border border-gray-200 text-gray-800"
+              placeholder="******"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
 
-        <StyledTouchableOpacity 
-          className="bg-emerald-600 rounded-lg py-4 items-center mt-3 active:bg-emerald-700"
-          onPress={handleLogin}
-          disabled={loading}
-        >
-          <StyledText className="text-white text-lg font-bold">{loading ? 'Cargando...' : 'Ingresar'}</StyledText>
-        </StyledTouchableOpacity>
+          {errorMessage ? <div className="text-red-500 text-center mb-2 -mt-2">{errorMessage}</div> : null}
 
-        <StyledView className="mt-6 flex-row justify-center gap-2">
-          <StyledText className="text-gray-500">¿No tienes cuenta?</StyledText>
-          <StyledTouchableOpacity onPress={() => navigation.navigate('Register')}>
-            <StyledText className="text-emerald-600 font-bold">Regístrate</StyledText>
-          </StyledTouchableOpacity>
-        </StyledView>
-      </StyledView>
-    </KeyboardAvoidingView>
+          <button
+            className="w-full bg-emerald-600 rounded-lg py-4 mt-3 text-white text-lg font-bold disabled:opacity-60"
+            onClick={handleLogin}
+            disabled={loading}
+          >
+            {loading ? 'Cargando...' : 'Ingresar'}
+          </button>
+
+          <div className="mt-6 flex justify-center gap-2">
+            <span className="text-gray-500">¿No tienes cuenta?</span>
+            <Link to="/register" className="text-emerald-600 font-bold">
+              Regístrate
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
   );
-};
-
-export default LoginScreen;
+}

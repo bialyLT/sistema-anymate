@@ -8,5 +8,5 @@ class Imagen(models.Model):
 
 class Ubicacion(models.Model):
     codigo_ubicacion = models.BigAutoField(primary_key=True)
-    longitud = models.IntegerField()
-    latitud = models.IntegerField()
+    longitud = models.FloatField()
+    latitud = models.FloatField()
