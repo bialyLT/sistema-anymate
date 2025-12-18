@@ -1,12 +1,16 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View } from 'react-native';
 import MapView, { UrlTile } from 'react-native-maps';
+import { styled } from 'nativewind';
+
+const StyledView = styled(View);
+const StyledMapView = styled(MapView);
 
 const MapScreen = () => {
   return (
-    <View style={styles.container}>
-      <MapView
-        style={styles.map}
+    <StyledView className="flex-1">
+      <StyledMapView
+        className="w-full h-full"
         initialRegion={{
           latitude: -34.6037,
           longitude: -58.3816,
@@ -24,19 +28,9 @@ const MapScreen = () => {
           maximumZ={19}
           flipY={false}
         />
-      </MapView>
-    </View>
+      </StyledMapView>
+    </StyledView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  map: {
-    width: '100%',
-    height: '100%',
-  },
-});
 
 export default MapScreen;

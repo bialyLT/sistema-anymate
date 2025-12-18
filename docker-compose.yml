@@ -12,7 +12,7 @@ services:
 
   backend:
     build: ./backend
-    command: python src/manage.py runserver 0.0.0.0:8000
+    command: sh -c "python src/manage.py migrate && python src/manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./backend:/app
     ports:
@@ -28,7 +28,7 @@ services:
 
   frontend:
     build: ./frontend
-    command: npx expo start --web --host lan
+    command: sh -c "npm install && npx expo start --web --host lan"
     volumes:
       - ./frontend:/app
       - /app/node_modules
