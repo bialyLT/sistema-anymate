@@ -39,10 +39,9 @@ function ClickToSelect({ enabled, onSelect }: { enabled: boolean; onSelect: (lat
 }
 
 export default function MapScreen() {
-  const { token } = useAuth();
+  const { token, isNormalUser, isAdminOrEmployee } = useAuth();
   const baseURL = getApiBaseUrl();
 
-  const [isAdmin, setIsAdmin] = useState(false);
   const [dispensers, setDispensers] = useState<DispenserDto[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
@@ -57,6 +56,14 @@ export default function MapScreen() {
   const [foto, setFoto] = useState<File | null>(null);
 
   const [editingId, setEditingId] = useState<number | null>(null);
+
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportSelecting, setReportSelecting] = useState(false);
+  const [reportLat, setReportLat] = useState<number | null>(null);
+  const [reportLng, setReportLng] = useState<number | null>(null);
+  const [reportSubmitting, setReportSubmitting] = useState(false);
+  const [reportError, setReportError] = useState('');
+  const [reportSuccess, setReportSuccess] = useState('');
 
   const headers = useMemo(() => {
     if (!token) return {};
@@ -80,25 +87,6 @@ export default function MapScreen() {
   useEffect(() => {
     // Siempre: cargar dispensers para verlos en el mapa (sin sesión también).
     fetchDispensers();
-
-    // Si hay sesión: determinar rol para habilitar CRUD.
-    if (!token) {
-      setIsAdmin(false);
-      return;
-    }
-
-    (async () => {
-      try {
-        const profileRes = await axios.get(`${baseURL}/api/users/profile/`, { headers });
-        const grupos: string[] = profileRes.data?.grupos || [];
-        const ok = grupos.includes('Administrador') || grupos.includes('Administrador Empleado');
-        setIsAdmin(ok);
-      } catch (e) {
-        console.error(e);
-        setIsAdmin(false);
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, baseURL]);
 
   const resetForm = () => {
@@ -110,6 +98,51 @@ export default function MapScreen() {
     setSelectedLat(null);
     setSelectedLng(null);
     setSelecting(false);
+  };
+
+  const resetReport = () => {
+    setReportOpen(false);
+    setReportSelecting(false);
+    setReportLat(null);
+    setReportLng(null);
+    setReportSubmitting(false);
+    setReportError('');
+    setReportSuccess('');
+  };
+
+  const submitReport = async () => {
+    setReportError('');
+    setReportSuccess('');
+
+    if (!token) {
+      setReportError('Necesitás iniciar sesión para reportar.');
+      return;
+    }
+    if (!isNormalUser) {
+      setReportError('Solo los usuarios normales pueden reportar.');
+      return;
+    }
+    if (reportLat == null || reportLng == null) {
+      setReportError('Seleccioná una ubicación en el mapa');
+      return;
+    }
+
+    setReportSubmitting(true);
+    try {
+      await axios.post(
+        `${baseURL}/api/solicitudes/`,
+        { latitud: reportLat, longitud: reportLng },
+        { headers: { Authorization: `Token ${token}` } }
+      );
+      setReportSuccess('Solicitud enviada. ¡Gracias por reportar!');
+      setReportSelecting(false);
+    } catch (e: any) {
+      console.error(e);
+      const msg = e?.response?.data?.detail || 'No se pudo enviar la solicitud';
+      setReportError(msg);
+    } finally {
+      setReportSubmitting(false);
+    }
   };
 
   const startEdit = (d: DispenserDto) => {
@@ -192,12 +225,12 @@ export default function MapScreen() {
     <div className="w-full">
       <div
         className={
-          isAdmin
+          isAdminOrEmployee
             ? 'grid gap-4 lg:grid-cols-[360px_1fr]'
             : 'grid gap-4'
         }
       >
-        {isAdmin ? (
+        {isAdminOrEmployee ? (
           <Card className="h-[calc(100vh-7.5rem)] overflow-hidden">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-2">
@@ -337,7 +370,7 @@ export default function MapScreen() {
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
                 <ClickToSelect
-                  enabled={isAdmin && selecting}
+                  enabled={isAdminOrEmployee && selecting}
                   onSelect={(lat, lng) => {
                     setSelectedLat(lat);
                     setSelectedLng(lng);
@@ -345,9 +378,24 @@ export default function MapScreen() {
                   }}
                 />
 
-                {isAdmin && selectedLat != null && selectedLng != null ? (
+                <ClickToSelect
+                  enabled={isNormalUser && reportOpen && reportSelecting}
+                  onSelect={(lat, lng) => {
+                    setReportLat(lat);
+                    setReportLng(lng);
+                    setReportSelecting(false);
+                  }}
+                />
+
+                {isAdminOrEmployee && selectedLat != null && selectedLng != null ? (
                   <Marker position={[selectedLat, selectedLng]}>
                     <Popup>Ubicación seleccionada</Popup>
+                  </Marker>
+                ) : null}
+
+                {isNormalUser && reportOpen && reportLat != null && reportLng != null ? (
+                  <Marker position={[reportLat, reportLng]}>
+                    <Popup>Ubicación a reportar</Popup>
                   </Marker>
                 ) : null}
 
@@ -360,6 +408,65 @@ export default function MapScreen() {
             </div>
           </CardContent>
         </Card>
+
+        {isNormalUser ? (
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle>¿Viste un dispenser y no aparece en el mapa?</CardTitle>
+              <CardDescription>Reportalo para que podamos evaluarlo y sumarlo.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {reportError ? (
+                <Alert variant="destructive">
+                  <AlertDescription className="break-words">{reportError}</AlertDescription>
+                </Alert>
+              ) : null}
+
+              {reportSuccess ? (
+                <Alert variant="success">
+                  <AlertDescription className="break-words">{reportSuccess}</AlertDescription>
+                </Alert>
+              ) : null}
+
+              {!reportOpen ? (
+                <Button type="button" className="w-full" onClick={() => setReportOpen(true)}>
+                  Reportalo
+                </Button>
+              ) : (
+                <div className="space-y-3">
+                  <div className="rounded-lg border border-gray-200 p-3">
+                    <div className="text-sm font-medium text-gray-900">Ubicación</div>
+                    <div className="mt-1 text-sm text-gray-600">
+                      {reportLat != null && reportLng != null
+                        ? `Lat ${reportLat.toFixed(6)}, Lng ${reportLng.toFixed(6)}`
+                        : 'No seleccionada'}
+                    </div>
+                    {reportSelecting ? (
+                      <div className="mt-2 text-xs text-emerald-700">Hacé click en el mapa para seleccionar.</div>
+                    ) : null}
+                    <div className="mt-3 flex gap-2">
+                      <Button
+                        type="button"
+                        variant={reportSelecting ? 'secondary' : 'outline'}
+                        onClick={() => setReportSelecting((s) => !s)}
+                        disabled={reportSubmitting}
+                      >
+                        {reportSelecting ? 'Cancelar' : 'Seleccionar'}
+                      </Button>
+                      <Button type="button" variant="secondary" onClick={resetReport} disabled={reportSubmitting}>
+                        Cerrar
+                      </Button>
+                    </div>
+                  </div>
+
+                  <Button type="button" className="w-full" onClick={submitReport} disabled={reportSubmitting}>
+                    {reportSubmitting ? 'Enviando…' : 'Enviar solicitud'}
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ) : null}
       </div>
     </div>
   );

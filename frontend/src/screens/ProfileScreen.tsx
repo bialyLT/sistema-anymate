@@ -9,66 +9,25 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
-interface PersonaData {
-  codigo_persona: number;
-  nombre: string;
-  apellido: string;
-  direccion: string;
-  telefono: string;
-  fecha_nacimiento: string;
-}
-
-interface UserProfileData {
-  id: number;
-  username: string;
-  email: string;
-  first_name: string;
-  last_name: string;
-  persona: PersonaData | null;
-  grupos?: string[];
-}
-
 export default function ProfileScreen() {
-  const [profile, setProfile] = useState<UserProfileData | null>(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const { token, logout } = useAuth();
+  const { token, logout, profile, isProfileLoading, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const baseURL = getApiBaseUrl();
 
   useEffect(() => {
-    fetchProfile();
-  }, []);
-
-  const fetchProfile = async () => {
-    if (!token) {
-      setError('No hay sesión activa');
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const response = await axios.get(`${baseURL}/api/users/profile/`, {
-        headers: {
-          'Authorization': `Token ${token}`
-        }
-      });
-      setProfile(response.data);
-      setError('');
-    } catch (err: any) {
-      console.error('Error fetching profile:', err);
+    refreshProfile().catch(() => {
+      // refreshProfile already logs; just show friendly UI.
       setError('Error al cargar el perfil');
-    } finally {
-      setLoading(false);
-    }
-  };
+    });
+  }, [refreshProfile]);
 
   const handleLogout = async () => {
     await logout();
     navigate('/login');
   };
 
-  if (loading) {
+  if (isProfileLoading) {
     return (
       <div className="min-h-[calc(100vh-6rem)] flex items-center justify-center px-4">
         <Card className="w-full max-w-2xl">
@@ -105,11 +64,27 @@ export default function ProfileScreen() {
               <AlertDescription>{error}</AlertDescription>
             </Alert>
             <div className="flex gap-2">
-              <Button onClick={fetchProfile}>Reintentar</Button>
+              <Button onClick={() => refreshProfile()}>Reintentar</Button>
               <Button variant="outline" onClick={() => navigate('/home')}>
                 Ir al inicio
               </Button>
             </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!token) {
+    return (
+      <div className="min-h-[calc(100vh-6rem)] flex items-center justify-center px-4">
+        <Card className="w-full max-w-2xl">
+          <CardHeader>
+            <CardTitle>Mi perfil</CardTitle>
+            <CardDescription>No hay sesión activa.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button onClick={() => navigate('/login')}>Iniciar sesión</Button>
           </CardContent>
         </Card>
       </div>

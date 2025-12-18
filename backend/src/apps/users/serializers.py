@@ -39,6 +39,41 @@ class UserSerializer(serializers.ModelSerializer):
         return value
 
 
+class AdminEmployeeCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password']
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            email=validated_data.get('email', ''),
+            password=validated_data['password'],
+        )
+
+        group, _ = Group.objects.get_or_create(name='Administrador Empleado')
+        user.groups.add(group)
+        return user
+
+    def validate_email(self, value):
+        if value and User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Este correo electrónico ya está registrado.")
+        return value
+
+    def validate_username(self, value):
+        reserved_names = ['admin', 'administrador', 'soporte', 'root', 'superuser', 'moderador']
+        if value.lower() in reserved_names:
+            raise serializers.ValidationError("Este nombre de usuario no está disponible.")
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("Este nombre de usuario ya está registrado.")
+        if len(value) < 3:
+            raise serializers.ValidationError("El usuario debe tener al menos 3 caracteres.")
+        if ' ' in value:
+            raise serializers.ValidationError("El usuario no puede contener espacios.")
+        return value
+
+
 class PersonaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Persona

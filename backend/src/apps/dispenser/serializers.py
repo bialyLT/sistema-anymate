@@ -5,6 +5,10 @@ from .models import Dispenser, DispenserImagen
 
 
 class UbicacionSerializer(serializers.ModelSerializer):
+    # Ubicacion usa DecimalField; para el frontend necesitamos números.
+    latitud = serializers.FloatField()
+    longitud = serializers.FloatField()
+
     class Meta:
         model = Ubicacion
         fields = ["codigo_ubicacion", "longitud", "latitud"]
