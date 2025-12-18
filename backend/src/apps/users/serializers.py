@@ -46,7 +46,14 @@ class PersonaSerializer(serializers.ModelSerializer):
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    persona = PersonaSerializer(read_only=True)
+    persona = serializers.SerializerMethodField()
+
+    def get_persona(self, obj):
+        try:
+            persona = obj.persona
+        except Persona.DoesNotExist:
+            return None
+        return PersonaSerializer(persona).data
     
     class Meta:
         model = User
